@@ -1,9 +1,8 @@
-import { useContext } from "react";
-import { ThemeContext } from "../context";
+import { useDarkMode } from "../context";
 
 export default function DisplayCurrentTheme() {
-    const { theme } = useContext(ThemeContext);
+    const { isDarkMode } = useDarkMode();
     return (
-        <h1 className="text-4xl font-bold">The current theme is {theme} {theme === 'light' ? '🌞' : '🌚'}</h1>
+        <h1 className="text-4xl font-bold">The current theme is {isDarkMode ? 'dark' : 'light'} {isDarkMode ? '🌚' : '🌞'}</h1>
     )
 }

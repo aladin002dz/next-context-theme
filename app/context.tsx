@@ -3,18 +3,19 @@
 import {
     createContext,
     ReactNode,
+    useContext,
     useEffect,
     useState
 } from 'react';
 
 
-type ThemeContextType = {
-    theme: string;
-    setTheme: (theme: string) => void;
+type DarkModeContextType = {
+    isDarkMode: boolean;
+    toggleDarkMode: () => void;
 };
-const initialTheme = "dark";
-export const ThemeContext = createContext<ThemeContextType>({ theme: initialTheme, setTheme: () => { } });
 
+export const DarkModeContext = createContext<DarkModeContextType>({ isDarkMode: false, toggleDarkMode: () => { } });
+export const useDarkMode = () => useContext(DarkModeContext);
 
 export function ThemeProvider({
     children
@@ -22,23 +23,45 @@ export function ThemeProvider({
     children: ReactNode
 }) {
 
-    const [theme, setTheme] = useState<string>(initialTheme);
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
-        setTheme(initialTheme);
-    }, [initialTheme]);
+        // Check system preference
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const savedMode = localStorage.getItem('darkMode');
+        if (savedMode !== null) {
+            setIsDarkMode(savedMode === 'true');
+        } else {
+            // If not in localStorage, check system preference
+            setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+        }
+
+        const handler = () => {
+            if (localStorage.getItem('darkMode') === null) {
+                setIsDarkMode(mediaQuery.matches);
+            }
+        };
+        mediaQuery.addEventListener('change', handler);
+        return () => mediaQuery.removeEventListener('change', handler);
+    }, []);
 
     useEffect(() => {
-        if (theme === 'dark') {
+        if (isDarkMode) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-    }, [theme]);
+        // Save to localStorage
+        localStorage.setItem('darkMode', isDarkMode.toString());
+    }, [isDarkMode]);
+
+    const toggleDarkMode = () => {
+        setIsDarkMode(prev => !prev);
+    };
 
     return (
-        <ThemeContext.Provider value={{ theme, setTheme }}>
+        <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
             {children}
-        </ThemeContext.Provider>
+        </DarkModeContext.Provider>
     );
 }
