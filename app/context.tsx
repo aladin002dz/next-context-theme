@@ -28,6 +28,14 @@ export function ThemeProvider({
         setTheme(initialTheme);
     }, [initialTheme]);
 
+    useEffect(() => {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [theme]);
+
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>
             {children}
