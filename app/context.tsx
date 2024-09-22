@@ -23,7 +23,20 @@ export function ThemeProvider({
     children: ReactNode
 }) {
 
-    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(
+        (() => {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const savedMode = localStorage.getItem('darkMode');
+            if (savedMode !== null) {
+                return (savedMode === 'true');
+            } else {
+                // If not in localStorage, check system preference
+                return (mediaQuery.matches);
+            }
+        })()
+    );
+
 
     useEffect(() => {
         // Check system preference
