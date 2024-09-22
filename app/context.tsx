@@ -22,7 +22,7 @@ export function ThemeProvider({
     children: ReactNode
 }) {
 
-    let [theme, setTheme] = useState<string>(initialTheme);
+    const [theme, setTheme] = useState<string>(initialTheme);
 
     useEffect(() => {
         setTheme(initialTheme);
