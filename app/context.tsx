@@ -10,62 +10,33 @@ import {
 
 
 type DarkModeContextType = {
-    isDarkMode: boolean;
+    isDarkMode: boolean | null;
     toggleDarkMode: () => void;
 };
 
-export const DarkModeContext = createContext<DarkModeContextType>({ isDarkMode: false, toggleDarkMode: () => { } });
+export const DarkModeContext = createContext<DarkModeContextType>({ isDarkMode: null, toggleDarkMode: () => { } });
 export const useDarkMode = () => useContext(DarkModeContext);
 
-export function ThemeProvider({
-    children
-}: {
-    children: ReactNode
-}) {
-
-
-    const [isDarkMode, setIsDarkMode] = useState<boolean>(
-        (() => {
-            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            const savedMode = localStorage.getItem('darkMode');
-            if (savedMode !== null) {
-                return (savedMode === 'true');
-            } else {
-                // If not in localStorage, check system preference
-                return (mediaQuery.matches);
-            }
-        })()
-    );
-
-
+export function ThemeProvider({ children }: { children: ReactNode }) {
+    const [isDarkMode, setIsDarkMode] = useState<boolean | null>(null);
     useEffect(() => {
+
         // Check system preference
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const savedMode = localStorage.getItem('darkMode');
-        if (savedMode !== null) {
-            setIsDarkMode(savedMode === 'true');
-        } else {
-            // If not in localStorage, check system preference
-            setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
-        }
-
+        setIsDarkMode(mediaQuery.matches);
         const handler = () => {
-            if (localStorage.getItem('darkMode') === null) {
-                setIsDarkMode(mediaQuery.matches);
-            }
+            setIsDarkMode(mediaQuery.matches);
         };
         mediaQuery.addEventListener('change', handler);
         return () => mediaQuery.removeEventListener('change', handler);
     }, []);
 
     useEffect(() => {
-        if (isDarkMode) {
+        if (isDarkMode === true) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-        // Save to localStorage
-        localStorage.setItem('darkMode', isDarkMode.toString());
     }, [isDarkMode]);
 
     const toggleDarkMode = () => {
