@@ -24,29 +24,23 @@ export function ThemeProvider({
 }) {
 
 
-    const [isDarkMode, setIsDarkMode] = useState<boolean>(
-        (() => {
-            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            const savedMode = localStorage.getItem('darkMode');
-            if (savedMode !== null) {
-                return (savedMode === 'true');
-            } else {
-                // If not in localStorage, check system preference
-                return (mediaQuery.matches);
-            }
-        })()
-    );
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
 
     useEffect(() => {
-        // Check system preference
+        const userChoice = localStorage.getItem('darkMode');
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const savedMode = localStorage.getItem('darkMode');
-        if (savedMode !== null) {
-            setIsDarkMode(savedMode === 'true');
+        if (userChoice !== null) {
+            const currentUserChoice = JSON.parse(userChoice);
+            if (currentUserChoice) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            setIsDarkMode(currentUserChoice);
         } else {
             // If not in localStorage, check system preference
-            setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+            setIsDarkMode(mediaQuery.matches);
         }
 
         const handler = () => {
@@ -58,7 +52,10 @@ export function ThemeProvider({
         return () => mediaQuery.removeEventListener('change', handler);
     }, []);
 
-    useEffect(() => {
+
+
+    const toggleDarkMode = () => {
+        // Toggle dark mode
         if (isDarkMode) {
             document.documentElement.classList.add('dark');
         } else {
@@ -66,9 +63,6 @@ export function ThemeProvider({
         }
         // Save to localStorage
         localStorage.setItem('darkMode', isDarkMode.toString());
-    }, [isDarkMode]);
-
-    const toggleDarkMode = () => {
         setIsDarkMode(prev => !prev);
     };
 
